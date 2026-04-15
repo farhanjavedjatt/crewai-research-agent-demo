@@ -16,7 +16,9 @@ cmds = [
 cmds = ["echo 'Build complete.'"]
 
 [start]
-cmd = "/opt/venv/bin/streamlit run streamlit_app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true --browser.gatherUsageStats false"
+# Shell-free launcher handles PORT lookup in Python — avoids Nixpacks's
+# quirky $VAR expansion across exec vs. shell invocations.
+cmd = "/opt/venv/bin/python start.py"
 
 [variables]
 PYTHONUNBUFFERED = "1"

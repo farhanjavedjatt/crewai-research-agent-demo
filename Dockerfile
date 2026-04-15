@@ -21,7 +21,7 @@ COPY src ./src
 RUN pip install -r requirements.txt && pip install -e .
 
 # App source
-COPY streamlit_app.py ./
+COPY streamlit_app.py start.py ./
 COPY .streamlit ./.streamlit
 COPY supabase ./supabase
 
@@ -36,4 +36,4 @@ ENV PORT=8501
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -fsS "http://localhost:${PORT}/_stcore/health" || exit 1
 
-CMD ["sh", "-c", "streamlit run streamlit_app.py --server.port ${PORT} --server.address 0.0.0.0 --server.headless true --browser.gatherUsageStats false"]
+CMD ["python", "start.py"]

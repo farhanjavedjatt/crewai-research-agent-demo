@@ -29,15 +29,20 @@ def _bootstrap_secrets() -> None:
     No-op locally (uses ``.env``) and on Railway (uses real env vars). Only
     scalar secrets at the top level are copied; nested sections are ignored.
     Existing env vars win — we never clobber values provided by the host.
+
+    ``st.secrets`` is lazy: the TOML parse happens on first *iteration* or
+    subscript, not on attribute access, so the exception guard must wrap
+    the iteration itself.
     """
     try:
-        secrets = st.secrets  # type: ignore[attr-defined]
+        keys = list(st.secrets)  # type: ignore[attr-defined]
     except Exception:
+        # No secrets file configured (local dev, or SCC with empty secrets).
         return
 
-    for key in list(secrets):  # iterate top-level keys safely
+    for key in keys:
         try:
-            value = secrets[key]
+            value = st.secrets[key]  # type: ignore[attr-defined]
         except Exception:
             continue
         if isinstance(value, (str, int, float, bool)):

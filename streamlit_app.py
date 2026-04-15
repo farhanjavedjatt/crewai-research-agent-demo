@@ -5,10 +5,16 @@ Run locally:
 
 Railway runs the same command via the Procfile. The server port comes from
 the `PORT` env var (see Procfile / railway.json).
+
+On Streamlit Community Cloud, secrets configured in the dashboard are exposed
+via :data:`st.secrets`. The small ``_bootstrap_secrets`` helper below copies
+them into :mod:`os.environ` so ``pydantic-settings`` picks them up — this keeps
+a single config path across local / Railway / SCC.
 """
 
 from __future__ import annotations
 
+import os
 import queue
 import threading
 from datetime import datetime
@@ -16,10 +22,35 @@ from typing import Any
 
 import streamlit as st
 
-from research_crew.integrations import get_store
-from research_crew.logging_conf import configure_logging
-from research_crew.runner import ProgressEvent, RunResult, run_research
-from research_crew.settings import settings
+
+def _bootstrap_secrets() -> None:
+    """Promote ``st.secrets`` into ``os.environ`` (Streamlit Community Cloud).
+
+    No-op locally (uses ``.env``) and on Railway (uses real env vars). Only
+    scalar secrets at the top level are copied; nested sections are ignored.
+    Existing env vars win — we never clobber values provided by the host.
+    """
+    try:
+        secrets = st.secrets  # type: ignore[attr-defined]
+    except Exception:
+        return
+
+    for key in list(secrets):  # iterate top-level keys safely
+        try:
+            value = secrets[key]
+        except Exception:
+            continue
+        if isinstance(value, (str, int, float, bool)):
+            os.environ.setdefault(key, str(value))
+
+
+# Must run before anything imports `research_crew.settings`.
+_bootstrap_secrets()
+
+from research_crew.integrations import get_store  # noqa: E402
+from research_crew.logging_conf import configure_logging  # noqa: E402
+from research_crew.runner import ProgressEvent, RunResult, run_research  # noqa: E402
+from research_crew.settings import settings  # noqa: E402
 
 configure_logging()
 

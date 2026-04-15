@@ -200,6 +200,43 @@ railway domain   # mint a public URL
 
 ---
 
+## Deploying to Streamlit Community Cloud
+
+Yes — this repo deploys to [Streamlit Community Cloud](https://share.streamlit.io)
+with no code changes.
+
+1. Push the repo to GitHub.
+2. [share.streamlit.io](https://share.streamlit.io) → **New app** → pick your repo.
+   - **Main file path:** `streamlit_app.py`
+   - **Python version:** `3.11`
+3. Under **⋯ → Settings → Secrets**, paste the contents of
+   `.streamlit/secrets.toml.example` with real values. Save.
+4. The app restarts and is live at `https://<your-slug>.streamlit.app`.
+
+### How secrets work here
+
+`streamlit_app.py` calls `_bootstrap_secrets()` before any `research_crew` import.
+That helper copies every scalar key from `st.secrets` into `os.environ`, so
+`pydantic-settings` picks them up exactly as it does from a local `.env` file.
+The same code therefore runs unchanged on local / Railway / SCC.
+
+### Community Cloud caveats
+
+- **Memory:** free tier caps at ~1 GB RAM. CrewAI's install is heavy but fits;
+  if you hit OOM during a run, switch `MODEL_NAME` to a lighter model and keep
+  the DuckDuckGo tool (no Serper) to trim memory.
+- **Build time:** first boot pulls a lot of deps (~3–5 min). Subsequent boots
+  are cached.
+- **Cold starts / sleep:** free apps sleep after inactivity. First request after
+  a sleep takes ~30 s to wake.
+- **Secrets visibility:** SCC stores secrets encrypted but a compromised repo
+  collaborator can read them. Treat the dashboard like prod IAM.
+
+The `Procfile`, `railway.json`, `nixpacks.toml`, and `Dockerfile` are all
+ignored by SCC — safe to leave in place for multi-target deploys.
+
+---
+
 ## Swapping the LLM
 
 `MODEL_NAME` is passed straight to LiteLLM, so anything on

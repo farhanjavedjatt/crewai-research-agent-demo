@@ -16,9 +16,19 @@ from __future__ import annotations
 
 import os
 import queue
+import sys
 import threading
 from datetime import datetime
+from pathlib import Path
 from typing import Any
+
+# Make the `src/` layout importable without requiring `pip install -e .`.
+# Streamlit Community Cloud installs from `requirements.txt` only and never
+# runs `pip install -e .`, so we inject the src dir ourselves. No-op when
+# the package is already installed (local dev, Railway, Docker).
+_SRC_DIR = str(Path(__file__).resolve().parent / "src")
+if _SRC_DIR not in sys.path:
+    sys.path.insert(0, _SRC_DIR)
 
 import streamlit as st
 

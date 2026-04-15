@@ -208,10 +208,20 @@ with no code changes.
 1. Push the repo to GitHub.
 2. [share.streamlit.io](https://share.streamlit.io) → **New app** → pick your repo.
    - **Main file path:** `streamlit_app.py`
-   - **Python version:** `3.11`
+   - **Python version:** `3.11` ← *important*. SCC defaults to the latest
+     Python (3.14 as of this writing) which may lack wheels for some of
+     CrewAI's transitive deps. The dropdown is in the New-app / Advanced
+     Settings panel.
 3. Under **⋯ → Settings → Secrets**, paste the contents of
    `.streamlit/secrets.toml.example` with real values. Save.
 4. The app restarts and is live at `https://<your-slug>.streamlit.app`.
+
+> **How the `src/` layout is resolved on SCC.** SCC installs your
+> `requirements.txt` but does **not** run `pip install -e .`, so the
+> `research_crew` package at `src/research_crew/` would normally be invisible
+> to Python. The first few lines of `streamlit_app.py` add the `src/` directory
+> to `sys.path` — no install required. This shim is a no-op on Railway and
+> local dev because there the package is already installed in editable mode.
 
 ### How secrets work here
 

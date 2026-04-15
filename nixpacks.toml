@@ -1,0 +1,23 @@
+# Nixpacks build configuration for Railway.
+# Pins Python 3.11 and installs from requirements.txt + the local package.
+
+[phases.setup]
+nixPkgs = ["python311", "gcc"]
+
+[phases.install]
+cmds = [
+    "python -m venv /opt/venv",
+    ". /opt/venv/bin/activate && pip install --upgrade pip",
+    ". /opt/venv/bin/activate && pip install -r requirements.txt",
+    ". /opt/venv/bin/activate && pip install -e ."
+]
+
+[phases.build]
+cmds = ["echo 'Build complete.'"]
+
+[start]
+cmd = "/opt/venv/bin/streamlit run streamlit_app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true --browser.gatherUsageStats false"
+
+[variables]
+PYTHONUNBUFFERED = "1"
+PIP_NO_CACHE_DIR = "1"

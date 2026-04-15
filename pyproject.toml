@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "research-crew"
+version = "0.1.0"
+description = "A production-grade CrewAI multi-agent research assistant with Supabase persistence and a Streamlit UI."
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+license = { text = "MIT" }
+authors = [{ name = "Sentient Flow Solutions" }]
+keywords = ["crewai", "agents", "llm", "supabase", "streamlit"]
+
+dependencies = [
+    "crewai>=0.86.0,<1.0",
+    "crewai-tools>=0.17.0,<1.0",
+    "supabase>=2.9.0,<3.0",
+    "streamlit>=1.39.0,<2.0",
+    "pydantic>=2.8,<3.0",
+    "pydantic-settings>=2.5,<3.0",
+    "python-dotenv>=1.0,<2.0",
+    "rich>=13.7,<14.0",
+    "typer>=0.12,<1.0",
+    "ddgs>=9.0.0,<10.0",
+    "tenacity>=9.0,<10.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3,<9.0",
+    "pytest-mock>=3.14,<4.0",
+    "ruff>=0.6,<1.0",
+    "mypy>=1.11,<2.0",
+]
+
+[project.scripts]
+research-crew = "research_crew.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"research_crew" = ["config/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q --strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true

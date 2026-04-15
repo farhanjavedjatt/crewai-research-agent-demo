@@ -1,0 +1,68 @@
+plan_task:
+  description: >
+    Build a research plan for the following query:
+
+    "{query}"
+
+    Produce 3-5 numbered sub-questions that, if answered, would fully address
+    the query. Each sub-question should be a specific, web-searchable claim.
+    Briefly note the intent of each sub-question (1 short sentence).
+  expected_output: >
+    A numbered list of 3-5 sub-questions, each with a one-line intent.
+  agent: planner
+
+research_task:
+  description: >
+    Execute the research plan produced by the strategist. For every
+    sub-question, run targeted web searches and gather at least 2 credible
+    sources. Extract the most relevant facts and quote figures/dates verbatim
+    where possible. Note any contradictory findings.
+
+    Original query for context: "{query}"
+  expected_output: >
+    For each sub-question: a short factual briefing (120-250 words) plus a
+    list of sources in the format `- [Title](URL) — one-line summary`.
+  agent: researcher
+  context: [plan_task]
+
+analysis_task:
+  description: >
+    Synthesise the raw research into 3-5 key insights that answer the original
+    query: "{query}". Each insight must be a concrete, defensible claim — not
+    a restatement of facts. For each insight, flag the confidence level
+    (High/Medium/Low) and the strongest supporting source.
+  expected_output: >
+    A list of 3-5 insights. Each insight: a bold headline claim, a 2-3
+    sentence justification, confidence label, and the key source link.
+  agent: analyst
+  context: [research_task]
+
+writing_task:
+  description: >
+    Produce the final executive research brief in clean markdown, answering:
+    "{query}".
+
+    Required structure:
+
+      # {query}
+      **TL;DR** — 3 sentences.
+
+      ## Key Insights
+      - Headline insights with inline citations.
+
+      ## Detailed Findings
+      - One subsection per sub-question.
+
+      ## Open Questions
+      - What the research could not conclusively answer.
+
+      ## Sources
+      - De-duplicated citation list.
+
+    Use inline citations like [1], [2] linked to the Sources section. Do NOT
+    invent URLs.
+  expected_output: >
+    A complete, well-formatted markdown research brief ready to share with
+    an executive audience.
+  agent: writer
+  context: [plan_task, research_task, analysis_task]
